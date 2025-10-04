@@ -40,14 +40,73 @@
             }
         }(window.location))
     </script>
+    <script>
+        // Fix webpack public path for GitHub Pages
+        window.__webpack_public_path__ = './';
+
+        // Override webpack's public path after it loads
+        const originalDefine = window.define;
+        if (originalDefine) {
+            window.define = function (name, deps, factory) {
+                if (typeof name === 'function') {
+                    factory = name;
+                    name = null;
+                }
+                if (Array.isArray(name)) {
+                    factory = deps;
+                    deps = name;
+                    name = null;
+                }
+                if (typeof deps === 'function') {
+                    factory = deps;
+                    deps = [];
+                }
+                if (factory && typeof factory === 'function') {
+                    const originalFactory = factory;
+                    factory = function () {
+                        const result = originalFactory.apply(this, arguments);
+                        // Fix any webpack public path issues
+                        if (result && result.p !== undefined) {
+                            result.p = './';
+                        }
+                        return result;
+                    };
+                }
+                return originalDefine.call(this, name, deps, factory);
+            };
+        }
+    </script>
     <script src="./js/chunk-vendors.59287c6b.js" onerror="console.error('Failed to load chunk-vendors.js')"></script>
     <script src="./js/app.7177699d.js" onerror="console.error('Failed to load app.js')"></script>
     <script>
         // Check if Vue app loaded
         setTimeout(function () {
-            if (!document.querySelector('#app').innerHTML.trim()) {
+            const app = document.querySelector('#app');
+            if (!app.innerHTML.trim()) {
                 console.error('Vue app did not mount - check console for errors');
-                document.querySelector('#app').innerHTML = '<p style="color: red;">Vue app failed to load. Check browser console for errors.</p>';
+                app.innerHTML = '<p style="color: red;">Vue app failed to load. Check browser console for errors.</p>';
+            } else {
+                console.log('Vue app content:', app.innerHTML);
+                // Check for image loading issues
+                const images = document.querySelectorAll('img');
+                images.forEach((img, index) => {
+                    console.log(`Image ${index}:`, img.src, img.complete ? 'loaded' : 'loading...');
+                    img.onerror = function () {
+                        console.error('Image failed to load:', img.src);
+                        // Try to fix the path
+                        if (img.src && !img.src.startsWith('http') && !img.src.startsWith('./')) {
+                            const fixedSrc = './' + img.src;
+                            console.log('Trying fixed path:', fixedSrc);
+                            img.src = fixedSrc;
+                        }
+                    };
+                });
+
+                // Check CSS loading
+                const links = document.querySelectorAll('link[rel="stylesheet"]');
+                links.forEach((link, index) => {
+                    console.log(`CSS ${index}:`, link.href, link.sheet ? 'loaded' : 'loading...');
+                });
             }
         }, 3000);
     </script>
