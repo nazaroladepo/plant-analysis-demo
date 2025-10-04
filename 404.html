@@ -7,26 +7,16 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Plant Analysis Tool</title>
     <script type="text/javascript">
-        // GitHub Pages SPA redirect
-        // This script takes the current URL and redirects to the main app
-        // with the path as a query parameter, then the Vue router handles it
-
-        var pathSegmentsToKeep = 0;
-
-        var l = window.location;
-        l.replace(
-            l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-            l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-            l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-            (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-            l.hash
-        );
+        // Simple redirect to main app
+        var basePath = window.location.pathname.split('/').slice(0, -1).join('/') + '/';
+        window.location.replace(basePath);
     </script>
 </head>
 
 <body>
     <div id="app">
-        <p>Redirecting...</p>
+        <p>Redirecting to main app...</p>
+        <p><a href="./">Click here if not redirected automatically</a></p>
     </div>
 </body>
 
